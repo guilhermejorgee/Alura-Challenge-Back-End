@@ -1,2 +1,2 @@
 INSERT INTO CATEGORIA(descricao) VALUES('Alimentação');
-INSERT INTO CATEGORIA(descricao) VALUES('Laser');
+INSERT INTO CATEGORIA(descricao) VALUES('Lazer');

@@ -23,7 +23,7 @@ public class ReceitaDto {
 	}
 
 	public static List<ReceitaDto> converter(List<Receita> receitas) {
-		return receitas.stream().map(element -> new ReceitaDto(element)).toList();
+		return receitas.stream().map(ReceitaDto::new).toList();
 	}
 
 }

@@ -27,7 +27,7 @@ public class DespesaDto {
 	}
 
 	public static List<DespesaDto> converter(List<Despesa> despesa) {
-		return despesa.stream().map(element -> new DespesaDto(element)).toList();
+		return despesa.stream().map(DespesaDto::new).toList();
 	}
 
 }
