@@ -20,8 +20,6 @@ public class ReceitaService {
 		
 		if(receita.isPresent()) {
 			LocalDateTime dataAgora = LocalDateTime.now();
-			dataAgora.getMonth();
-			receita.get().getData().getMonth();
 			if(dataAgora.getMonth().equals(receita.get().getData().getMonth())){
 				return false;
 			}else {

@@ -17,19 +17,20 @@ import br.com.alura.challenge.backend.repository.DespesaRepository;
 @Service
 public class DespesaService {
 	
-	@Autowired
 	DespesaRepository despesaRepository;
+	CategoriaRepository categoriaRepository;
 	
 	@Autowired
-	CategoriaRepository categoriaRepository;
+	public DespesaService(DespesaRepository despesaRepository, CategoriaRepository categoriaRepository) {
+		this.categoriaRepository = categoriaRepository;
+		this.despesaRepository = despesaRepository;
+	}
 	
 	public boolean checarDuplicidade(String descricao) {
 		Optional<Despesa> despesa = despesaRepository.findByDescricaoIgnoreCase(descricao);
 		
 		if(despesa.isPresent()) {
 			LocalDateTime dataAgora = LocalDateTime.now();
-			dataAgora.getMonth();
-			despesa.get().getData().getMonth();
 			if(dataAgora.getMonth().equals(despesa.get().getData().getMonth())){
 				return false;
 			}else {
