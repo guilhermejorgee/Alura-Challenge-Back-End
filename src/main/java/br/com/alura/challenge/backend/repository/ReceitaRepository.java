@@ -17,5 +17,8 @@ public interface ReceitaRepository extends JpaRepository<Receita, Long> {
 	
 	@Query("select e from Receita e where year(e.data) = ?1 and month(e.data) = ?2")
 	List<Receita> findByYearAndMonth(int ano, int mes);
+	
+	@Query("select SUM(e.valor) from Receita e where year(e.data) = ?1 and month(e.data) = ?2")
+	BigDecimal findByTotalReceita(int ano, int mes);
 
 }

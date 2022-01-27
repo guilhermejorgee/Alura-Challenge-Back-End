@@ -2,6 +2,7 @@ package br.com.alura.challenge.backend.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import lombok.Getter;
 
@@ -14,10 +15,16 @@ public class ResumoDto {
 	
 	List<CategoriaTotalMesDto> categorias;
 	
-	public ResumoDto(List<BigDecimal> lista, List<CategoriaTotalMesDto> listaCategorias){
-		this.receitaTotal = lista.get(0);
-		this.despesaTotal = lista.get(1);
-		this.saldoFinal = lista.get(2);
+	public ResumoDto(BigDecimal receitaTotal, BigDecimal despesaTotal, List<CategoriaTotalMesDto> listaCategorias){
+		if(Optional.ofNullable(receitaTotal).isEmpty()) {
+			receitaTotal = new BigDecimal(0);
+		}
+		if(Optional.ofNullable(despesaTotal).isEmpty()) {
+			despesaTotal = new BigDecimal(0);
+		}
+		this.receitaTotal = receitaTotal;
+		this.despesaTotal = despesaTotal;
+		this.saldoFinal = receitaTotal.subtract(despesaTotal);
 		this.categorias = listaCategorias;
 	}
 

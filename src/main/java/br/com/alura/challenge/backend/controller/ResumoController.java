@@ -1,5 +1,6 @@
 package br.com.alura.challenge.backend.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -12,27 +13,34 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.alura.challenge.backend.dto.ResumoDto;
-import br.com.alura.challenge.backend.repository.ResumoRepository;
-import br.com.alura.challenge.backend.service.ResumoService;
+import br.com.alura.challenge.backend.repository.DespesaRepository;
+import br.com.alura.challenge.backend.repository.ReceitaRepository;
 
 @RestController
 @RequestMapping("/resumo")
 @Transactional
 public class ResumoController {
 	
+	DespesaRepository despesaRepository;
+	ReceitaRepository receitaRepository;
 	
-	ResumoRepository resumoRepository;
-	ResumoService resumoService;
 	
 	@Autowired
-	ResumoController(ResumoRepository resumoRepository, ResumoService resumoService){
-		this.resumoRepository = resumoRepository;
-		this.resumoService = resumoService;
+	ResumoController(DespesaRepository despesaRepository, ReceitaRepository receitaRepository){
+		this.receitaRepository = receitaRepository;
+		this.despesaRepository = despesaRepository;
 	}
 	
 	@GetMapping("/resumo/{ano}/{mes}")
 	public ResponseEntity<ResumoDto> buscar(@PathVariable int ano, @PathVariable int mes){	
-		return ResponseEntity.ok(new ResumoDto(resumoRepository.relatorioSaldoMes(ano, mes), resumoService.relatorioCategorias(ano, mes)));
+		
+		BigDecimal receita = receitaRepository.findByTotalReceita(ano, mes);
+		
+		BigDecimal despesa = despesaRepository.findByTotalDespesa(ano, mes);
+		
+		var valorCategorias = despesaRepository.buscarTotalValorCategoria(ano, mes);
+		
+		return ResponseEntity.ok(new ResumoDto(receita, despesa, valorCategorias));
 		
 	}
 

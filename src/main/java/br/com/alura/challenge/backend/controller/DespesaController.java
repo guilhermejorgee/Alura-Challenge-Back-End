@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import br.com.alura.challenge.backend.dto.CategoriaTotalMesDto;
 import br.com.alura.challenge.backend.dto.DespesaDto;
 import br.com.alura.challenge.backend.dto.ReceitaDto;
 import br.com.alura.challenge.backend.form.AtualizacaoDespesaForm;
@@ -115,6 +116,11 @@ public class DespesaController {
 	@GetMapping("/{ano}/{mes}")
 	public ResponseEntity<List<DespesaDto>> buscarDespesasPorMesEAno(@PathVariable int ano, @PathVariable int mes){
 		return ResponseEntity.ok(DespesaDto.converter(despesaRepository.findByYearAndMonth(ano, mes)));		
+	}
+	
+	@GetMapping("/categoria/{ano}/{mes}")
+	public ResponseEntity<List<CategoriaTotalMesDto>> categoria(@PathVariable int ano, @PathVariable int mes){
+		return ResponseEntity.ok(despesaRepository.buscarTotalValorCategoria(ano, mes));
 	}
 	
 	
