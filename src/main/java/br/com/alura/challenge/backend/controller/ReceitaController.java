@@ -1,5 +1,6 @@
 package br.com.alura.challenge.backend.controller;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +10,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,17 +18,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import br.com.alura.challenge.backend.controller.dto.ReceitaDto;
-import br.com.alura.challenge.backend.controller.form.ReceitaForm;
-import br.com.alura.challenge.backend.domain.Receita;
+import br.com.alura.challenge.backend.dto.DespesaDto;
+import br.com.alura.challenge.backend.dto.ReceitaDto;
+import br.com.alura.challenge.backend.dto.ResumoDto;
+import br.com.alura.challenge.backend.form.ReceitaForm;
+import br.com.alura.challenge.backend.model.Receita;
 import br.com.alura.challenge.backend.repository.ReceitaRepository;
 import br.com.alura.challenge.backend.service.ReceitaService;
 
 @RestController
-@RequestMapping("/receita")
+@RequestMapping("/receitas")
 @Transactional
 public class ReceitaController {
 	
@@ -93,6 +99,16 @@ public class ReceitaController {
 		return ResponseEntity.notFound().build();
 	}
 	
+	@GetMapping(params="descricao")
+	public ResponseEntity<List<ReceitaDto>> buscarReceitaPorDescricao(@RequestParam(value="descricao") String descricao){
+		List<Receita> receitas = receitaRepository.findByDescricaoContainsIgnoreCase(descricao);
+		return ResponseEntity.ok(ReceitaDto.converter(receitas));
+		
+	}
 	
-
+	@GetMapping("/{ano}/{mes}")
+	public ResponseEntity<List<ReceitaDto>> buscarDespesasPorMesEAno(@PathVariable int ano, @PathVariable int mes){
+		return ResponseEntity.ok(ReceitaDto.converter(receitaRepository.findByYearAndMonth(ano, mes)));	
+	}
+	
 }

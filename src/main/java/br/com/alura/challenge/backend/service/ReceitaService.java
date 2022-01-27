@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.com.alura.challenge.backend.domain.Receita;
+import br.com.alura.challenge.backend.model.Receita;
 import br.com.alura.challenge.backend.repository.ReceitaRepository;
 
 @Service
@@ -16,7 +16,7 @@ public class ReceitaService {
 	ReceitaRepository receitaRepository;
 
 	public boolean checarDuplicidade(String descricao) {
-		Optional<Receita> receita = receitaRepository.findByDescricao(descricao);
+		Optional<Receita> receita = receitaRepository.findByDescricaoIgnoreCase(descricao);
 		
 		if(receita.isPresent()) {
 			LocalDateTime dataAgora = LocalDateTime.now();

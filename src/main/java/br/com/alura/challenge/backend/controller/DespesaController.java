@@ -17,19 +17,22 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import br.com.alura.challenge.backend.controller.dto.DespesaDto;
-import br.com.alura.challenge.backend.controller.form.AtualizacaoDespesaForm;
-import br.com.alura.challenge.backend.controller.form.DespesaForm;
-import br.com.alura.challenge.backend.domain.Despesa;
+import br.com.alura.challenge.backend.dto.DespesaDto;
+import br.com.alura.challenge.backend.dto.ReceitaDto;
+import br.com.alura.challenge.backend.form.AtualizacaoDespesaForm;
+import br.com.alura.challenge.backend.form.DespesaForm;
+import br.com.alura.challenge.backend.model.Despesa;
+import br.com.alura.challenge.backend.model.Receita;
 import br.com.alura.challenge.backend.repository.CategoriaRepository;
 import br.com.alura.challenge.backend.repository.DespesaRepository;
 import br.com.alura.challenge.backend.service.DespesaService;
 
 @RestController
-@RequestMapping("/despesa")
+@RequestMapping("/despesas")
 @Transactional
 public class DespesaController {
 	
@@ -45,10 +48,10 @@ public class DespesaController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<DespesaDto> cadastro(@RequestBody @Valid DespesaForm form) throws AttributeNotFoundException{
+	public ResponseEntity<DespesaDto> cadastro(@RequestBody @Valid DespesaForm form){
 		
 		if(despesaService.checarDuplicidade(form.getDescricao())){
-			Despesa despesa = form.converter(categoriaRepository);
+			Despesa despesa = form.converter(despesaService);
 			despesaRepository.save(despesa);
 			URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/despesa/{id}").buildAndExpand(despesa.getId()).toUriString());
 			return ResponseEntity.created(uri).body(new DespesaDto(despesa));
@@ -101,5 +104,18 @@ public class DespesaController {
 		
 		return ResponseEntity.notFound().build();
 	}
+	
+	@GetMapping(params="descricao")
+	public ResponseEntity<List<DespesaDto>> buscarReceitaPorDescricao(@RequestParam(value="descricao") String descricao){
+		List<Despesa> despesas = despesaRepository.findByDescricaoContainsIgnoreCase(descricao);
+		return ResponseEntity.ok(DespesaDto.converter(despesas));
+		
+	}
+	
+	@GetMapping("/{ano}/{mes}")
+	public ResponseEntity<List<DespesaDto>> buscarDespesasPorMesEAno(@PathVariable int ano, @PathVariable int mes){
+		return ResponseEntity.ok(DespesaDto.converter(despesaRepository.findByYearAndMonth(ano, mes)));		
+	}
+	
 	
 }
