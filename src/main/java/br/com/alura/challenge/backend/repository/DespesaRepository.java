@@ -4,17 +4,18 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.el.lang.ELArithmetic.BigDecimalDelegate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import br.com.alura.challenge.backend.dto.CategoriaTotalMesDto;
 import br.com.alura.challenge.backend.model.Despesa;
-import br.com.alura.challenge.backend.model.Receita;
 
 public interface DespesaRepository extends JpaRepository<Despesa, Long> {
 
-	Optional<Despesa> findByDescricaoIgnoreCase(String descricao);
+	Optional<Despesa>findByDescricaoIgnoreCase(String descricao);
+	
+	@Query("select e from Despesa e where UPPER(e.descricao) = UPPER(?1) and e.id != ?2")
+	Optional<Despesa>findByDescricaoExcecaoId(String descricao, Long id);
 	
 	List<Despesa> findByDescricaoContainsIgnoreCase(String descricao);
 	

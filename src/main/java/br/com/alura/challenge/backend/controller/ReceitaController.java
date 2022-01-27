@@ -1,6 +1,5 @@
 package br.com.alura.challenge.backend.controller;
 
-import java.math.BigDecimal;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +9,6 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,14 +16,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import br.com.alura.challenge.backend.dto.DespesaDto;
 import br.com.alura.challenge.backend.dto.ReceitaDto;
-import br.com.alura.challenge.backend.dto.ResumoDto;
+import br.com.alura.challenge.backend.exception.InformacaoComDuplicidadeException;
+import br.com.alura.challenge.backend.exception.InformacaoNaoEncontradaException;
 import br.com.alura.challenge.backend.form.ReceitaForm;
 import br.com.alura.challenge.backend.model.Receita;
 import br.com.alura.challenge.backend.repository.ReceitaRepository;
@@ -48,45 +45,44 @@ public class ReceitaController {
 	@PostMapping
 	public ResponseEntity<ReceitaDto> cadastrar(@RequestBody @Valid ReceitaForm form){
 		
-		if(receitaService.checarDuplicidade(form.getDescricao())) {
-			Receita receita = form.converter();
-			receitaRepository.save(receita);
-			URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/receita/{id}").buildAndExpand(receita.getId()).toUriString());
-			return ResponseEntity.created(uri).body(new ReceitaDto(receita));
+		Optional<ReceitaDto> receita = receitaService.cadastrarReceita(form);
+		
+		if(receita.isEmpty()) {
+			throw new InformacaoComDuplicidadeException("Já há uma receita com as mesmas caracteristicas no sistema"); 
 		}
 		
-		return ResponseEntity.badRequest().build();
-	
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/receita/{id}").buildAndExpand(receita.get().getId()).toUriString());
+		return ResponseEntity.created(uri).body(receita.get());
+			
 	}
 	
 	@GetMapping
 	public ResponseEntity<List<ReceitaDto>> listagem(){
-		List<Receita> receitas = receitaRepository.findAll();
-		return ResponseEntity.ok(ReceitaDto.converter(receitas));
+		return ResponseEntity.ok(receitaService.listarTodasReceitas());
 	}
 	
 	@GetMapping("/{id}")
 	public ResponseEntity<ReceitaDto> detalhamentoReceita(@PathVariable Long id){
-		Optional<Receita> receita = receitaRepository.findById(id);
-		if(receita.isPresent()) {
-			return ResponseEntity.ok(new ReceitaDto(receita.get()));
+		Optional<ReceitaDto> receita = receitaService.ReceitaDetalhada(id);
+		if(receita.isEmpty()) {
+			throw new InformacaoNaoEncontradaException("ID não encontrado");
 		}
-		return ResponseEntity.notFound().build();
+		
+		return ResponseEntity.ok(receita.get());
+		
 	}
 	
 	@PutMapping("/{id}")
 	public ResponseEntity<ReceitaDto> atualizar(@PathVariable Long id, @RequestBody @Valid ReceitaForm form){
-		Optional<Receita> receita = receitaRepository.findById(id);
-		if(receita.isPresent()) {
-			if(receitaService.checarDuplicidade(form.getDescricao())) {
-				receita.get().atualizar(form);
-				return ResponseEntity.ok(new ReceitaDto(receita.get()));
-			}else {
-				return ResponseEntity.badRequest().build();
-			}
+		
+		Optional<ReceitaDto> receita = receitaService.atualizarReceita(id, form);
+		
+		if(receita.isEmpty()) {
+			throw new InformacaoNaoEncontradaException("ID não encontrado");
 		}
 		
-		return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(receita.get());	
+		
 	}
 	
 	@DeleteMapping("/{id}")

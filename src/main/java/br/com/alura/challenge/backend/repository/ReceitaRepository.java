@@ -15,6 +15,9 @@ public interface ReceitaRepository extends JpaRepository<Receita, Long> {
 	
 	List<Receita> findByDescricaoContainsIgnoreCase(String descricao);
 	
+	@Query("select e from Receita e where UPPER(e.descricao) = UPPER(?1) and e.id != ?2")
+	Optional<Receita>findByDescricaoExcecaoId(String descricao, Long id);
+	
 	@Query("select e from Receita e where year(e.data) = ?1 and month(e.data) = ?2")
 	List<Receita> findByYearAndMonth(int ano, int mes);
 	
