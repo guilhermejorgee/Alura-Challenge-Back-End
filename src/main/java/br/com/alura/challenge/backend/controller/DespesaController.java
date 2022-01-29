@@ -2,7 +2,6 @@ package br.com.alura.challenge.backend.controller;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -19,41 +18,25 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.alura.challenge.backend.dto.DespesaDto;
-import br.com.alura.challenge.backend.exception.InformacaoComDuplicidadeException;
-import br.com.alura.challenge.backend.exception.InformacaoNaoEncontradaException;
 import br.com.alura.challenge.backend.form.AtualizacaoDespesaForm;
 import br.com.alura.challenge.backend.form.DespesaForm;
-import br.com.alura.challenge.backend.repository.CategoriaRepository;
-import br.com.alura.challenge.backend.repository.DespesaRepository;
 import br.com.alura.challenge.backend.service.DespesaService;
 
 @RestController
 @RequestMapping("/despesas")
 public class DespesaController {
 	
-	DespesaRepository despesaRepository;
-	CategoriaRepository categoriaRepository;
+	@Autowired
 	DespesaService despesaService;
 	
-	@Autowired
-	DespesaController(DespesaRepository despesaRepository, CategoriaRepository categoriaRepository, DespesaService despesaService){
-		this.despesaRepository = despesaRepository;
-		this.categoriaRepository = categoriaRepository;
-		this.despesaService = despesaService;
-	}
 	
 	@PostMapping
-	public ResponseEntity<DespesaDto> cadastro(@RequestBody @Valid DespesaForm form){
+	public ResponseEntity<DespesaDto> cadastro(@RequestBody @Valid DespesaForm form){	
 		
-		Optional<DespesaDto> despesa = despesaService.cadastrarDespesa(form);
+		DespesaDto despesa = despesaService.cadastrarDespesa(form);
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/despesa/{id}").buildAndExpand(despesa.getId()).toUriString());
 		
-		if(despesa.isEmpty()) {
-			throw new InformacaoComDuplicidadeException("Já há uma despesa com as mesmas caracteristicas no sistema"); 
-		}
-		
-		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/despesa/{id}").buildAndExpand(despesa.get().getId()).toUriString());
-		return ResponseEntity.created(uri).body(despesa.get());
-
+		return ResponseEntity.created(uri).body(despesa);
 	}
 	
 	@GetMapping
@@ -62,37 +45,18 @@ public class DespesaController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<DespesaDto> detalhamentoDespesa(@PathVariable Long id){
-		
-		Optional<DespesaDto> despesa = despesaService.despesaDetalhada(id);
-		
-		if(despesa.isEmpty()) {	
-			throw new InformacaoNaoEncontradaException("ID não encontrado");
-		}
-		
-		return ResponseEntity.ok(despesa.get());
-		
+	public ResponseEntity<DespesaDto> detalhamentoDespesa(@PathVariable Long id){		
+		return ResponseEntity.ok(despesaService.despesaDetalhada(id));	
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<DespesaDto> atualizar(@PathVariable Long id, @RequestBody @Valid AtualizacaoDespesaForm form){
-		
-		Optional<DespesaDto> despesa = despesaService.atualizarDespesa(id, form);
-		
-		if(despesa.isEmpty()) {
-			throw new InformacaoNaoEncontradaException("ID não encontrado");
-		}		
-		
-		return ResponseEntity.ok(despesa.get());	
+	public ResponseEntity<DespesaDto> atualizar(@PathVariable Long id, @RequestBody @Valid AtualizacaoDespesaForm form){	
+		return ResponseEntity.ok(despesaService.atualizarDespesa(id, form));	
 	}
 	
 	@DeleteMapping("/{id}")
 	public void remover(@PathVariable Long id){
-		        		
-		if(!despesaService.removerDespesa(id)) {
-			throw new InformacaoNaoEncontradaException("ID não encontrado");
-		}	
-		
+		despesaService.removerDespesa(id);
 	}
 	
 	@GetMapping(params="descricao")

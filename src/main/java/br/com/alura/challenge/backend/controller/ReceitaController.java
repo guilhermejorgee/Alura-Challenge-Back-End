@@ -2,7 +2,6 @@ package br.com.alura.challenge.backend.controller;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -19,8 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.alura.challenge.backend.dto.ReceitaDto;
-import br.com.alura.challenge.backend.exception.InformacaoComDuplicidadeException;
-import br.com.alura.challenge.backend.exception.InformacaoNaoEncontradaException;
 import br.com.alura.challenge.backend.form.ReceitaForm;
 import br.com.alura.challenge.backend.repository.ReceitaRepository;
 import br.com.alura.challenge.backend.service.ReceitaService;
@@ -41,14 +38,10 @@ public class ReceitaController {
 	@PostMapping
 	public ResponseEntity<ReceitaDto> cadastrar(@RequestBody @Valid ReceitaForm form){
 		
-		Optional<ReceitaDto> receita = receitaService.cadastrarReceita(form);
+		ReceitaDto receita = receitaService.cadastrarReceita(form);
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/receita/{id}").buildAndExpand(receita.getId()).toUriString());
 		
-		if(receita.isEmpty()) {
-			throw new InformacaoComDuplicidadeException("Já há uma receita com as mesmas caracteristicas no sistema"); 
-		}
-		
-		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/receita/{id}").buildAndExpand(receita.get().getId()).toUriString());
-		return ResponseEntity.created(uri).body(receita.get());
+		return ResponseEntity.created(uri).body(receita);
 			
 	}
 	
@@ -58,36 +51,19 @@ public class ReceitaController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<ReceitaDto> detalhamentoReceita(@PathVariable Long id){
-		Optional<ReceitaDto> receita = receitaService.ReceitaDetalhada(id);
-		if(receita.isEmpty()) {
-			throw new InformacaoNaoEncontradaException("ID não encontrado");
-		}
-		
-		return ResponseEntity.ok(receita.get());
-		
+	public ResponseEntity<ReceitaDto> detalhamentoReceita(@PathVariable Long id){	
+		return ResponseEntity.ok(receitaService.ReceitaDetalhada(id));	
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<ReceitaDto> atualizar(@PathVariable Long id, @RequestBody @Valid ReceitaForm form){
-		
-		Optional<ReceitaDto> receita = receitaService.atualizarReceita(id, form);
-		
-		if(receita.isEmpty()) {
-			throw new InformacaoNaoEncontradaException("ID não encontrado");
-		}
-		
-		return ResponseEntity.ok(receita.get());	
+	public ResponseEntity<ReceitaDto> atualizar(@PathVariable Long id, @RequestBody @Valid ReceitaForm form){	
+		return ResponseEntity.ok(receitaService.atualizarReceita(id, form));	
 		
 	}
 	
 	@DeleteMapping("/{id}")
 	public void remover(@PathVariable Long id){
-
-		if(!receitaService.removerReceita(id)) {
-			throw new InformacaoNaoEncontradaException("ID não encontrado");
-		}
-		
+		receitaService.removerReceita(id);	
 	}
 	
 	@GetMapping(params="descricao")

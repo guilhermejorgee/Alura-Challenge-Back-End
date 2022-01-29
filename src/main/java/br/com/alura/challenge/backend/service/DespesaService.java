@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import br.com.alura.challenge.backend.dto.DespesaDto;
 import br.com.alura.challenge.backend.exception.CategoriaInvalidaException;
 import br.com.alura.challenge.backend.exception.InformacaoComDuplicidadeException;
+import br.com.alura.challenge.backend.exception.InformacaoNaoEncontradaException;
 import br.com.alura.challenge.backend.form.AtualizacaoDespesaForm;
 import br.com.alura.challenge.backend.form.DespesaForm;
 import br.com.alura.challenge.backend.model.Categoria;
@@ -32,67 +33,55 @@ public class DespesaService {
 		this.despesaRepository = despesaRepository;
 	}
 	
+	public Despesa consultarDespesa(Long id) {
+		return despesaRepository.findById(id).orElseThrow(() -> new InformacaoNaoEncontradaException("ID não encontrado"));
+	}
+	
 	public List<DespesaDto> buscarDespesasPorMesEAno(int ano, int mes){
 		return DespesaDto.converter(despesaRepository.findByYearAndMonth(ano, mes));	
 	}
 	
 	public List<DespesaDto> buscarDespesaPorDescricao(String descricao){
-		List<Despesa> despesas = despesaRepository.findByDescricaoContainsIgnoreCase(descricao);
-		return DespesaDto.converter(despesas);
+		return DespesaDto.converter(despesaRepository.findByDescricaoContainsIgnoreCase(descricao));
 	}
 	
-	public boolean removerDespesa(Long id){
+	public void removerDespesa(Long id){
 		
-		Optional<Despesa> despesa = despesaRepository.findById(id);
+		consultarDespesa(id);
 		
-		if(despesa.isPresent()) {
-			despesaRepository.deleteById(id);
-			return true;
-		}
-		
-		return false;
-	}
-	
-	public Optional<DespesaDto> atualizarDespesa(Long id, AtualizacaoDespesaForm form){
-		
-		Optional<Despesa> despesa = despesaRepository.findById(id);
-		
-		if(despesa.isPresent()) {
-			if(checarDuplicidade(form.getDescricao(), id)){
-				despesa.get().atualizar(form);
-				return Optional.of(new DespesaDto(despesa.get()));
-			}else {
-				throw new InformacaoComDuplicidadeException("Já há uma despesa com as mesmas caracteristicas no banco de dados");
-			}
-		}
-		
-		return Optional.empty();
+		despesaRepository.deleteById(id);
 	}
 	
 	
-	public Optional<DespesaDto> despesaDetalhada(Long id) {
+	public DespesaDto atualizarDespesa(Long id, AtualizacaoDespesaForm form){
 		
-		Optional<Despesa> despesa = despesaRepository.findById(id);
+		Despesa despesa = consultarDespesa(id);
 		
-		if(despesa.isPresent()) {
-			return Optional.of(new DespesaDto(despesa.get()));
-		}
-		return Optional.empty();
-		
+		if(checarDuplicidade(form.getDescricao(), id)){
+			despesa.atualizar(form);		
+		}		
+		return new DespesaDto(despesa);
+	}
+	
+	
+	public DespesaDto despesaDetalhada(Long id) {
+		return new DespesaDto(consultarDespesa(id));
 	}
 	
 	public List<DespesaDto> listarTodasDespesas(){
 		return DespesaDto.converter(despesaRepository.findAll());
 	}
 	
-	public Optional<DespesaDto> cadastrarDespesa(DespesaForm form) {
+	public DespesaDto cadastrarDespesa(DespesaForm form) {
+		
+		Despesa despesa = null;
 		
 		if(checarDuplicidade(form.getDescricao(), null)){
-			Despesa despesa = form.converter(checarCategoria(form.getNomeCategoria()));
-			return Optional.of(new DespesaDto(despesaRepository.save(despesa)));
-		}
+			despesa = form.converter(checarCategoria(form.getNomeCategoria()));
+			
+		}	
 		
-		return Optional.empty();
+		return new DespesaDto(despesaRepository.save(despesa));
 		
 	}
 	
@@ -110,7 +99,7 @@ public class DespesaService {
 		if(despesa.isPresent()) {
 			LocalDateTime dataAgora = LocalDateTime.now();
 			if(dataAgora.getMonth().equals(despesa.get().getData().getMonth())){
-				return false;
+				throw new InformacaoComDuplicidadeException("Já há uma despesa com as mesmas caracteristicas no banco de dados");
 			}else {
 				return true;
 			}
