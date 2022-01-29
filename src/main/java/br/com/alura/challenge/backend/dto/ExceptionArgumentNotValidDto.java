@@ -7,12 +7,12 @@ import lombok.Getter;
 @Getter
 public class ExceptionArgumentNotValidDto {
 	
-	String field;
-	String message;
+	private String field;
+	private String message;
 	
-	public ExceptionArgumentNotValidDto(FieldError element) {
-		this.field = element.getField();
-		this.message = element.getDefaultMessage();
+	public ExceptionArgumentNotValidDto(FieldError obj) {
+		this.field = obj.getField();
+		this.message = obj.getDefaultMessage();
 	}
 	
 

@@ -9,9 +9,9 @@ import lombok.Getter;
 @Getter
 public class ResumoDto {
 	
-	BigDecimal receitaTotal;
-	BigDecimal despesaTotal;
-	BigDecimal saldoFinal;	
+	private BigDecimal receitaTotal;
+	private BigDecimal despesaTotal;
+	private BigDecimal saldoFinal;	
 	
 	List<CategoriaTotalMesDto> categorias;
 	

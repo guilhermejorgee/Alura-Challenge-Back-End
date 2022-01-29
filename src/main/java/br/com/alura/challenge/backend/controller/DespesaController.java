@@ -4,7 +4,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,24 +15,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import br.com.alura.challenge.backend.dto.CategoriaTotalMesDto;
 import br.com.alura.challenge.backend.dto.DespesaDto;
 import br.com.alura.challenge.backend.exception.InformacaoComDuplicidadeException;
 import br.com.alura.challenge.backend.exception.InformacaoNaoEncontradaException;
 import br.com.alura.challenge.backend.form.AtualizacaoDespesaForm;
 import br.com.alura.challenge.backend.form.DespesaForm;
-import br.com.alura.challenge.backend.model.Despesa;
 import br.com.alura.challenge.backend.repository.CategoriaRepository;
 import br.com.alura.challenge.backend.repository.DespesaRepository;
 import br.com.alura.challenge.backend.service.DespesaService;
 
 @RestController
 @RequestMapping("/despesas")
-@Transactional
 public class DespesaController {
 	
 	DespesaRepository despesaRepository;
@@ -92,32 +87,23 @@ public class DespesaController {
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> remover(@PathVariable Long id){
-		Optional<Despesa> despesa = despesaRepository.findById(id);
+	public void remover(@PathVariable Long id){
+		        		
+		if(!despesaService.removerDespesa(id)) {
+			throw new InformacaoNaoEncontradaException("ID não encontrado");
+		}	
 		
-		if(despesa.isPresent()) {
-			despesaRepository.deleteById(id);
-			return ResponseEntity.ok().build();
-		}
-		
-		return ResponseEntity.notFound().build();
 	}
 	
 	@GetMapping(params="descricao")
-	public ResponseEntity<List<DespesaDto>> buscarReceitaPorDescricao(@RequestParam(value="descricao") String descricao){
-		List<Despesa> despesas = despesaRepository.findByDescricaoContainsIgnoreCase(descricao);
-		return ResponseEntity.ok(DespesaDto.converter(despesas));
+	public ResponseEntity<List<DespesaDto>> despesaPorDescricao(String descricao){
+		return ResponseEntity.ok(despesaService.buscarDespesaPorDescricao(descricao));
 		
 	}
 	
 	@GetMapping("/{ano}/{mes}")
-	public ResponseEntity<List<DespesaDto>> buscarDespesasPorMesEAno(@PathVariable int ano, @PathVariable int mes){
-		return ResponseEntity.ok(DespesaDto.converter(despesaRepository.findByYearAndMonth(ano, mes)));		
-	}
-	
-	@GetMapping("/categoria/{ano}/{mes}")
-	public ResponseEntity<List<CategoriaTotalMesDto>> categoria(@PathVariable int ano, @PathVariable int mes){
-		return ResponseEntity.ok(despesaRepository.buscarTotalValorCategoria(ano, mes));
+	public ResponseEntity<List<DespesaDto>> despesasPorMesEAno(@PathVariable int ano, @PathVariable int mes){
+		return ResponseEntity.ok(despesaService.buscarDespesasPorMesEAno(ano, mes));		
 	}
 	
 	

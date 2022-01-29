@@ -8,8 +8,8 @@ import lombok.Getter;
 @Getter
 public class CategoriaTotalMesDto {
 	
-	String descricao;
-	BigDecimal total;
+	private String descricao;
+	private BigDecimal total;
 	
 	public CategoriaTotalMesDto(String descricao, BigDecimal total){
 		if(Optional.ofNullable(total).isEmpty()){

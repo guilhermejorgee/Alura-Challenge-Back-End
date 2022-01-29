@@ -4,7 +4,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -24,13 +22,11 @@ import br.com.alura.challenge.backend.dto.ReceitaDto;
 import br.com.alura.challenge.backend.exception.InformacaoComDuplicidadeException;
 import br.com.alura.challenge.backend.exception.InformacaoNaoEncontradaException;
 import br.com.alura.challenge.backend.form.ReceitaForm;
-import br.com.alura.challenge.backend.model.Receita;
 import br.com.alura.challenge.backend.repository.ReceitaRepository;
 import br.com.alura.challenge.backend.service.ReceitaService;
 
 @RestController
 @RequestMapping("/receitas")
-@Transactional
 public class ReceitaController {
 	
 	ReceitaRepository receitaRepository;
@@ -86,25 +82,23 @@ public class ReceitaController {
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> remover(@PathVariable Long id){
-		Optional<Receita> receita = receitaRepository.findById(id);
-		if(receita.isPresent()) {
-			receitaRepository.deleteById(id);
-			return ResponseEntity.ok().build();
+	public void remover(@PathVariable Long id){
+
+		if(!receitaService.removerReceita(id)) {
+			throw new InformacaoNaoEncontradaException("ID não encontrado");
 		}
-		return ResponseEntity.notFound().build();
+		
 	}
 	
 	@GetMapping(params="descricao")
-	public ResponseEntity<List<ReceitaDto>> buscarReceitaPorDescricao(@RequestParam(value="descricao") String descricao){
-		List<Receita> receitas = receitaRepository.findByDescricaoContainsIgnoreCase(descricao);
-		return ResponseEntity.ok(ReceitaDto.converter(receitas));
+	public ResponseEntity<List<ReceitaDto>> receitaPorDescricao(String descricao){
+		return ResponseEntity.ok(receitaService.buscarReceitaPorDescricao(descricao));
 		
 	}
 	
 	@GetMapping("/{ano}/{mes}")
-	public ResponseEntity<List<ReceitaDto>> buscarDespesasPorMesEAno(@PathVariable int ano, @PathVariable int mes){
-		return ResponseEntity.ok(ReceitaDto.converter(receitaRepository.findByYearAndMonth(ano, mes)));	
+	public ResponseEntity<List<ReceitaDto>> receitaPorMesEAno(@PathVariable int ano, @PathVariable int mes){
+		return ResponseEntity.ok(receitaService.buscarReceitaPorMesEAno(ano, mes));	
 	}
 	
 }

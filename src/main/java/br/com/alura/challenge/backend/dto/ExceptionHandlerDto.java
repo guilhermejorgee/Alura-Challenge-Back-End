@@ -1,12 +1,10 @@
 package br.com.alura.challenge.backend.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-@Data
-@NoArgsConstructor
 @AllArgsConstructor
+@Getter
 public class ExceptionHandlerDto {
 	
 	private int status;

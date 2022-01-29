@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import br.com.alura.challenge.backend.repository.CategoriaRepository;
 import br.com.alura.challenge.backend.repository.DespesaRepository;
 
 @Service
+@Transactional
 public class DespesaService {
 	
 	DespesaRepository despesaRepository;
@@ -28,6 +30,27 @@ public class DespesaService {
 	public DespesaService(DespesaRepository despesaRepository, CategoriaRepository categoriaRepository) {
 		this.categoriaRepository = categoriaRepository;
 		this.despesaRepository = despesaRepository;
+	}
+	
+	public List<DespesaDto> buscarDespesasPorMesEAno(int ano, int mes){
+		return DespesaDto.converter(despesaRepository.findByYearAndMonth(ano, mes));	
+	}
+	
+	public List<DespesaDto> buscarDespesaPorDescricao(String descricao){
+		List<Despesa> despesas = despesaRepository.findByDescricaoContainsIgnoreCase(descricao);
+		return DespesaDto.converter(despesas);
+	}
+	
+	public boolean removerDespesa(Long id){
+		
+		Optional<Despesa> despesa = despesaRepository.findById(id);
+		
+		if(despesa.isPresent()) {
+			despesaRepository.deleteById(id);
+			return true;
+		}
+		
+		return false;
 	}
 	
 	public Optional<DespesaDto> atualizarDespesa(Long id, AtualizacaoDespesaForm form){
