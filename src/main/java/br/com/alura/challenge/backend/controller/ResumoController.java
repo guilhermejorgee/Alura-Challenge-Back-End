@@ -1,6 +1,5 @@
 package br.com.alura.challenge.backend.controller;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,11 +16,11 @@ public class ResumoController {
 	
 	@Autowired
 	ResumoService resumoService;
-
+	
 	
 	@GetMapping("/resumo/{ano}/{mes}")
 	public ResponseEntity<ResumoDto> resumoMes(@PathVariable int ano, @PathVariable int mes){			
 		return ResponseEntity.ok(resumoService.gerarResumoMes(ano, mes));	
-	}
+	}	
 
 }

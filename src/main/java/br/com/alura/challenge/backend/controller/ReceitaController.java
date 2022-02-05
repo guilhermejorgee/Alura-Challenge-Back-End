@@ -19,21 +19,14 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.alura.challenge.backend.dto.ReceitaDto;
 import br.com.alura.challenge.backend.form.ReceitaForm;
-import br.com.alura.challenge.backend.repository.ReceitaRepository;
 import br.com.alura.challenge.backend.service.ReceitaService;
 
 @RestController
 @RequestMapping("/receitas")
 public class ReceitaController {
 	
-	ReceitaRepository receitaRepository;
-	ReceitaService receitaService;
-	
 	@Autowired
-	ReceitaController(ReceitaRepository receitaRepository, ReceitaService receitaService){
-		this.receitaRepository = receitaRepository;
-		this.receitaService = receitaService;
-	}
+	ReceitaService receitaService;
 	
 	@PostMapping
 	public ResponseEntity<ReceitaDto> cadastrar(@RequestBody @Valid ReceitaForm form){
@@ -52,7 +45,7 @@ public class ReceitaController {
 	
 	@GetMapping("/{id}")
 	public ResponseEntity<ReceitaDto> detalhamentoReceita(@PathVariable Long id){	
-		return ResponseEntity.ok(receitaService.ReceitaDetalhada(id));	
+		return ResponseEntity.ok(receitaService.receitaDetalhada(id));	
 	}
 	
 	@PutMapping("/{id}")
@@ -68,13 +61,13 @@ public class ReceitaController {
 	
 	@GetMapping(params="descricao")
 	public ResponseEntity<List<ReceitaDto>> receitaPorDescricao(String descricao){
-		return ResponseEntity.ok(receitaService.buscarReceitaPorDescricao(descricao));
+		return ResponseEntity.ok(receitaService.buscarReceitasPorDescricao(descricao));
 		
 	}
 	
 	@GetMapping("/{ano}/{mes}")
 	public ResponseEntity<List<ReceitaDto>> receitaPorMesEAno(@PathVariable int ano, @PathVariable int mes){
-		return ResponseEntity.ok(receitaService.buscarReceitaPorMesEAno(ano, mes));	
+		return ResponseEntity.ok(receitaService.buscarReceitasPorMesEAno(ano, mes));	
 	}
 	
 }

@@ -32,7 +32,7 @@ public class DespesaController {
 	
 	@PostMapping
 	public ResponseEntity<DespesaDto> cadastro(@RequestBody @Valid DespesaForm form){	
-		
+			
 		DespesaDto despesa = despesaService.cadastrarDespesa(form);
 		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/despesa/{id}").buildAndExpand(despesa.getId()).toUriString());
 		
@@ -61,7 +61,7 @@ public class DespesaController {
 	
 	@GetMapping(params="descricao")
 	public ResponseEntity<List<DespesaDto>> despesaPorDescricao(String descricao){
-		return ResponseEntity.ok(despesaService.buscarDespesaPorDescricao(descricao));
+		return ResponseEntity.ok(despesaService.buscarDespesasPorDescricao(descricao));
 		
 	}
 	
